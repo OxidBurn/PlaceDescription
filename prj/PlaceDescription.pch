@@ -1,0 +1,22 @@
+//
+// Prefix header for all source files of the 'PlaceDescription' target in the 'PlaceDescription' project
+//
+
+#import <Availability.h>
+#import <ArcGIS/ArcGIS.h>
+
+#ifndef __IPHONE_3_0
+#warning "This project uses features only available in iOS SDK 3.0 and later."
+#endif
+
+#ifdef __OBJC__
+    #import <UIKit/UIKit.h>
+    #import <Foundation/Foundation.h>
+
+    #ifndef __RELEASE__
+		#define DbgLog(s, ...) NSLog(@"%-35s | %s", [[NSString stringWithFormat : (s), ##__VA_ARGS__] UTF8String], [[[NSString stringWithUTF8String : __FUNCTION__] lastPathComponent] UTF8String])
+	#else
+		#define DbgLog(s, ...)
+	#endif
+
+#endif
