@@ -7,6 +7,8 @@
 //
 
 #import "PopoverContent.h"
+#import <MapKit/MapKit.h>
+#import "TTTLocationFormatter.h"
 
 @interface PopoverContent ()
 
@@ -14,11 +16,11 @@
 
 /** Latitude
  */
-@property (nonatomic, retain) UILabel* latitude;
+@property (nonatomic, retain) UILabel* latitudeLabel;
 
 /** Longtitude
  */
-@property (nonatomic, retain) UILabel* longtitude;
+@property (nonatomic, retain) UILabel* longtitudeLabel;
 
 // methods
 
@@ -29,8 +31,8 @@
 // public properties
 
 // private properties
-@synthesize latitude;
-@synthesize longtitude;
+@synthesize latitudeLabel;
+@synthesize longtitudeLabel;
 
 
 #pragma mark - Initialization -
@@ -59,8 +61,8 @@
 
 - (void) dealloc
 {
-    self.latitude     = nil;
-    self.longtitude   = nil;
+    self.latitudeLabel   = nil;
+    self.longtitudeLabel = nil;
     
     [super dealloc];
 }
@@ -78,22 +80,22 @@
 - (void) createUI
 {
     // Latitue
-    self.latitude = [[[UILabel alloc] initWithFrame: CGRectMake(10, 5, 180, 20)] autorelease];
+    self.latitudeLabel = [[[UILabel alloc] initWithFrame: CGRectMake(10, 5, 180, 20)] autorelease];
     
-    self.latitude.backgroundColor = [UIColor clearColor];
-    self.latitude.textColor       = [UIColor blackColor];
-    self.latitude.font            = [UIFont fontWithName: @"Helvetica" size: 13];
+    self.latitudeLabel.backgroundColor = [UIColor clearColor];
+    self.latitudeLabel.textColor       = [UIColor blackColor];
+    self.latitudeLabel.font            = [UIFont fontWithName: @"Helvetica" size: 13];
     
-    [self.view addSubview: self.latitude];
+    [self.view addSubview: self.latitudeLabel];
     
     // Longtitude
-    self.longtitude = [[[UILabel alloc] initWithFrame: CGRectMake(10, CGRectGetMaxY(self.latitude.frame) + 5, 180, 20)] autorelease];
+    self.longtitudeLabel = [[[UILabel alloc] initWithFrame: CGRectMake(10, CGRectGetMaxY(self.latitudeLabel.frame) + 5, 180, 20)] autorelease];
     
-    self.longtitude.backgroundColor = [UIColor clearColor];
-    self.longtitude.textColor       = [UIColor blackColor];
-    self.longtitude.font            = [UIFont fontWithName: @"Helvetica" size: 13];
+    self.longtitudeLabel.backgroundColor = [UIColor clearColor];
+    self.longtitudeLabel.textColor       = [UIColor blackColor];
+    self.longtitudeLabel.font            = [UIFont fontWithName: @"Helvetica" size: 13];
     
-    [self.view addSubview: self.longtitude];
+    [self.view addSubview: self.longtitudeLabel];
 }
 
 
@@ -101,8 +103,24 @@
 
 - (void) updateValues: (NSDictionary*) values
 {
-    self.latitude.text   = [NSString stringWithFormat: @"Latitude: %@", values[@"Latitude"]];
-    self.longtitude.text = [NSString stringWithFormat: @"Longitude: %@", values[@"Longitude"]];
+    CLLocation* location = [[[CLLocation alloc] initWithLatitude: [values[@"Latitude"] doubleValue]
+                                                       longitude: [values[@"Longitude"] doubleValue]] autorelease];
+    
+    NSUInteger degrees = location.coordinate.latitude;
+    CGFloat decimal    = fabs(location.coordinate.latitude - degrees);
+    NSUInteger minutes = decimal * 60;
+    CGFloat seconds    = decimal * 3600 - minutes * 60;
+    
+    NSString* lat = [NSString stringWithFormat: @"%d° %d' %1.4f\"", degrees, minutes, seconds];
+    
+    degrees = location.coordinate.longitude;
+    decimal = fabs(location.coordinate.longitude - degrees);
+    minutes = decimal * 60;
+    seconds = decimal * 3600 - minutes * 60;
+    
+    NSString* longt = [NSString stringWithFormat: @"%d° %d' %1.4f\"", degrees, minutes, seconds];
+    
+    self.latitudeLabel.text   = [NSString stringWithFormat: @"Latitude: %@", lat];
+    self.longtitudeLabel.text = [NSString stringWithFormat: @"Longitude: %@", longt];
 }
-
 @end
