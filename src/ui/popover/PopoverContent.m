@@ -27,7 +27,6 @@
 @implementation PopoverContent
 
 // public properties
-@synthesize positionInfo;
 
 // private properties
 @synthesize latitude;
@@ -60,7 +59,6 @@
 
 - (void) dealloc
 {
-    self.positionInfo = nil;
     self.latitude     = nil;
     self.longtitude   = nil;
     
@@ -84,7 +82,7 @@
     
     self.latitude.backgroundColor = [UIColor clearColor];
     self.latitude.textColor       = [UIColor blackColor];
-    self.latitude.text            = [NSString stringWithFormat: @"Latitude: %@", self.positionInfo[@"latitude"]];
+    self.latitude.font            = [UIFont fontWithName: @"Helvetica" size: 13];
     
     [self.view addSubview: self.latitude];
     
@@ -93,9 +91,18 @@
     
     self.longtitude.backgroundColor = [UIColor clearColor];
     self.longtitude.textColor       = [UIColor blackColor];
-    self.longtitude.text            = [NSString stringWithFormat: @"Longtitude: %@", self.positionInfo[@"longtitude"]];
+    self.longtitude.font            = [UIFont fontWithName: @"Helvetica" size: 13];
     
     [self.view addSubview: self.longtitude];
+}
+
+
+#pragma mark - Public method -
+
+- (void) updateValues: (NSDictionary*) values
+{
+    self.latitude.text   = [NSString stringWithFormat: @"Latitude: %@", values[@"Latitude"]];
+    self.longtitude.text = [NSString stringWithFormat: @"Longitude: %@", values[@"Longitude"]];
 }
 
 @end

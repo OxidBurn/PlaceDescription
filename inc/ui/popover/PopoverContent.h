@@ -12,15 +12,15 @@
 
 // properties
 
-/** Position information
- */
-@property (nonatomic, retain) NSDictionary* positionInfo;
-
 // methods
 
 /** Create UI
  */
 - (void) createUI;
+
+/** Setup position
+ */
+- (void) updateValues: (NSDictionary*) values;
 
 
 @end

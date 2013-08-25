@@ -9,6 +9,7 @@
 #import "RootView.h"
 #import "PopoverContent.h"
 #import <ArcGIS/AGSMapView.h>
+#import "AGSPoint+Coordinate.h"
 
 @interface RootView() <AGSMapViewTouchDelegate, AGSMapViewCalloutDelegate, AGSMapViewLayerDelegate, AGSMapServiceInfoDelegate, UIPopoverControllerDelegate>
 
@@ -54,7 +55,8 @@
 
 /** Show popover
  */
-- (void) showPopover: (CGPoint) point;
+- (void) showPopover: (CGPoint)       point
+            withInfo: (NSDictionary*) dictionary;
 
 /** Setup segment control
  */
@@ -103,6 +105,18 @@
 }
 
 
+#pragma mark - Layout -
+
+- (void) layoutSubviews
+{
+    [super layoutSubviews];
+    
+    self.mapView.frame        = self.bounds;
+    self.segmentControl.frame = CGRectMake((self.bounds.size.width - 220) / 2, self.bounds.size.height - 60, 220, 30);
+    self.stepper.frame        = CGRectMake(10, self.bounds.size.height - 60, 100, 30);
+}
+
+
 #pragma mark - UI -
 
 - (void) createUI
@@ -133,22 +147,16 @@
     // Map view
     self.mapView = [[[AGSMapView alloc] initWithFrame: self.bounds] autorelease];
     
-    self.mapView.layerDelegate = self;
-    self.mapView.touchDelegate = self;
+    self.mapView.layerDelegate    = self;
+    self.mapView.touchDelegate    = self;
+    self.mapView.clipsToBounds    = YES;
+    self.mapView.autoresizingMask = (UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth);
     
     [self.mapView addMapLayer: tiledLayer
                      withName: @"Tiled Layer"];
     
-    //Zoom To Envelope
-	//create extent to be used as default
-	AGSEnvelope* envelope = [AGSEnvelope envelopeWithXmin: -124.83145667
-                                                     ymin: 30.49849464
-                                                     xmax: -113.91375495
-                                                     ymax: 44.69150688
-                                         spatialReference: [AGSSpatialReference spatialReferenceWithWKID: 4326]];
-    
-	//call method to set extent, pass in envelope
-	[self.mapView zoomToEnvelope: envelope animated: YES];
+    self.mapView.locationDisplay.autoPanMode        = AGSLocationDisplayAutoPanModeDefault;
+    self.mapView.locationDisplay.wanderExtentFactor = 0.5;
     
     [self addSubview: self.mapView];
 }
@@ -157,9 +165,6 @@
 {
     // Popover content
     self.popoverContent = [[[PopoverContent alloc] init] autorelease];
-    
-    self.popoverContent.positionInfo = @{@"latitude"   : @"12312.12",
-                                         @"longtitude" : @"78567867.45"};
     
     [self.popoverContent createUI];
     
@@ -204,8 +209,11 @@
 }
 
 
-- (void) showPopover: (CGPoint) point
+- (void) showPopover: (CGPoint)       point
+            withInfo: (NSDictionary*) dictionary
 {
+    [self.popoverContent updateValues: dictionary];
+    
     [self.popoper presentPopoverFromRect: CGRectMake(point.x, point.y, 10, 10)
                                   inView: self.mapView
                 permittedArrowDirections: UIPopoverArrowDirectionAny
@@ -234,12 +242,10 @@
  didTapAndHoldAtPoint: (CGPoint)       screen
              mapPoint: (AGSPoint*)     mappoint
              graphics: (NSDictionary*) graphics
-{
-    DbgLog(@"Point %@", NSStringFromCGPoint(screen));
-    DbgLog(@"Map point %@", mappoint);
-    DbgLog(@"Point dictionary %@", graphics);
-    
-    [self showPopover: screen];
+{   
+    [self showPopover: screen
+             withInfo: @{@"Latitude" : [NSNumber numberWithDouble: mappoint.latitude],
+                         @"Longitude" : [NSNumber numberWithDouble: mappoint.longitude]}];
 }
 
 
@@ -296,5 +302,6 @@
     
     self.zoomValue = control.value;
 }
+
 
 @end
