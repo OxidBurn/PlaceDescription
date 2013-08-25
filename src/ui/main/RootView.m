@@ -10,8 +10,10 @@
 #import "PopoverContent.h"
 #import <ArcGIS/AGSMapView.h>
 #import "AGSPoint+Coordinate.h"
+#import "WYPopoverController.h"
 
-@interface RootView() <AGSMapViewTouchDelegate, AGSMapViewCalloutDelegate, AGSMapViewLayerDelegate, AGSMapServiceInfoDelegate, UIPopoverControllerDelegate>
+
+@interface RootView() <AGSMapViewTouchDelegate, AGSMapViewCalloutDelegate, AGSMapViewLayerDelegate, AGSMapServiceInfoDelegate, WYPopoverControllerDelegate>
 
 // properties
 
@@ -25,7 +27,7 @@
 
 /** Popover
  */
-@property (nonatomic, retain) UIPopoverController* popoper;
+@property (nonatomic, retain) WYPopoverController* popoper;
 
 /** Switcher for map view
  */
@@ -113,7 +115,13 @@
     
     self.mapView.frame        = self.bounds;
     self.segmentControl.frame = CGRectMake((self.bounds.size.width - 220) / 2, self.bounds.size.height - 60, 220, 30);
-    self.stepper.frame        = CGRectMake(10, self.bounds.size.height - 60, 100, 30);
+    
+    if (IS_IPAD)
+        self.stepper.frame = CGRectMake(10, self.bounds.size.height - 60, 100, 30);
+    else
+    {
+        self.stepper.frame = UIDeviceOrientationIsLandscape([UIApplication sharedApplication].statusBarOrientation) ? CGRectMake(10, self.bounds.size.height - 60, 100, 30) : CGRectMake((self.bounds.size.width - 100) / 2, self.bounds.size.height - 100, 100, 30);
+    }
 }
 
 
@@ -125,9 +133,6 @@
     
     // Setup map view
     [self setupMapView];
-    
-    // Setup popover
-    [self setupPopover];
     
     // Setup segment control
     [self setupSegmentControl];
@@ -168,12 +173,24 @@
     
     [self.popoverContent createUI];
     
+    self.popoverContent.title                       = @"Coordinate";
+    self.popoverContent.contentSizeForViewInPopover = CGSizeMake(200, 60);
+    
+    [self.popoverContent.navigationItem setRightBarButtonItem: [[UIBarButtonItem alloc] initWithBarButtonSystemItem: UIBarButtonSystemItemDone
+                                                                                                             target: self
+                                                                                                             action: @selector(onDone)]];
+    
+    UINavigationController* navigationController = [[UINavigationController alloc] initWithRootViewController: self.popoverContent];
+    
+    UIViewController* contentViewController = navigationController;
     
     // Popover
-    self.popoper = [[[UIPopoverController alloc] initWithContentViewController: self.popoverContent] autorelease];
+    self.popoper = [[[WYPopoverController alloc] initWithContentViewController: contentViewController] autorelease];
     
-    self.popoper.popoverContentSize = CGSizeMake(200, 60);
-    self.popoper.delegate           = self;
+    self.popoper.delegate                      = self;
+    self.popoper.passthroughViews              = @[self];
+    self.popoper.popoverLayoutMargins          = UIEdgeInsetsMake(10, 10, 10, 10);
+    self.popoper.wantsDefaultContentAppearance = NO;
 }
 
 - (void) setupSegmentControl
@@ -212,11 +229,13 @@
 - (void) showPopover: (CGPoint)       point
             withInfo: (NSDictionary*) dictionary
 {
+    [self setupPopover];
+    
     [self.popoverContent updateValues: dictionary];
     
     [self.popoper presentPopoverFromRect: CGRectMake(point.x, point.y, 10, 10)
                                   inView: self.mapView
-                permittedArrowDirections: UIPopoverArrowDirectionAny
+                permittedArrowDirections: WYPopoverArrowDirectionAny
                                 animated: YES];
 }
 
@@ -246,6 +265,15 @@
     [self showPopover: screen
              withInfo: @{@"Latitude" : [NSNumber numberWithDouble: mappoint.latitude],
                          @"Longitude" : [NSNumber numberWithDouble: mappoint.longitude]}];
+}
+
+
+- (void) mapView: (AGSMapView*)   mapView
+ didClickAtPoint: (CGPoint)       screen
+        mapPoint: (AGSPoint*)     mappoint
+        graphics: (NSDictionary*) graphics
+{
+    [self.popoper dismissPopoverAnimated: YES];
 }
 
 
@@ -301,6 +329,28 @@
         [self.mapView zoomOut: YES];
     
     self.zoomValue = control.value;
+}
+
+
+#pragma mark - Popover button action -
+
+- (void) onDone
+{
+    [self.popoper dismissPopoverAnimated: YES];
+}
+
+
+#pragma mark - WYPopoverControllerDelegate -
+
+- (BOOL) popoverControllerShouldDismiss: (WYPopoverController*) controller
+{
+    return YES;
+}
+
+- (void) popoverControllerDidDismiss: (WYPopoverController*) controller
+{
+//    self.popoper.delegate = nil;
+//    self.popoper          = nil;
 }
 
 
