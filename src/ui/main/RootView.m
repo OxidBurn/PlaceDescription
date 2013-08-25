@@ -187,6 +187,7 @@
     // Popover
     self.popoper = [[[WYPopoverController alloc] initWithContentViewController: contentViewController] autorelease];
     
+//    self.popoper.
     self.popoper.delegate                      = self;
     self.popoper.passthroughViews              = @[self];
     self.popoper.popoverLayoutMargins          = UIEdgeInsetsMake(10, 10, 10, 10);

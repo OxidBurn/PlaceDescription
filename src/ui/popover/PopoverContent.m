@@ -39,7 +39,7 @@
 {
     if (self)
     {
-        self.view.backgroundColor = [UIColor whiteColor];
+        self.view.backgroundColor = [UIColor colorWithRed: 0.678 green: 0.768 blue: 0.864 alpha: 1.000];;
     }
     
     return self;
