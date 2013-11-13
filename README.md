@@ -1,1 +1,4 @@
-# This is my README
+PlaceDescription
+================
+
+Sample project working with ARCGis SDK
