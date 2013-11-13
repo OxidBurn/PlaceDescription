@@ -8,7 +8,6 @@
 
 #import "PopoverContent.h"
 #import <MapKit/MapKit.h>
-#import "TTTLocationFormatter.h"
 
 @interface PopoverContent ()
 
